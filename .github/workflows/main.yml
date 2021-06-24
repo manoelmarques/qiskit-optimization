@@ -112,7 +112,19 @@ jobs:
       - uses: ./.github/actions/install-optimization
       - run: make lint
         shell: bash
-      - run: make mypy
+      - name: Run make mypy
+        run: |
+          if [ ${{ matrix.python-version == 3.6 }} ]; then
+            cat > mypy36.ini <<EOF
+          [mypy]
+          warn_unused_configs = True
+          ignore_missing_imports = True
+          strict_optional = False
+          EOF
+            mypy --config-file mypy36.ini qiskit_optimization test tools
+          else
+            make mypy
+          fi
         if: ${{ !cancelled() }}
         shell: bash
       - name: Run make lint latest version
